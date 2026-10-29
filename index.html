@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Avaliação de Projetos de TI</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .star-rating input[type="radio"] { display: none; }
+    .star-rating label { cursor: pointer; transition: all 0.2s; }
+    .star-rating input[type="radio"]:checked + label {
+      background-color: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-600 rounded-lg">
+          <i data-lucide="award" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white">Avaliação de Projetos de TI</h1>
+          <p class="text-xs text-slate-400">Sistema de Seleção e Parecer Técnico</p>
+        </div>
+      </div>
+      <!-- Navegação -->
+      <nav class="flex bg-slate-900 p-1 rounded-xl border border-slate-700">
+        <button onclick="switchTab('form')" id="tab-form" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-blue-600 text-white">
+          <i data-lucide="clipboard-edit" class="w-4 h-4"></i> Avaliação
+        </button>
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-slate-400 hover:text-white">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Dashboard
+        </button>
+        <button onclick="switchTab('reports')" id="tab-reports" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-slate-400 hover:text-white">
+          <i data-lucide="file-text" class="w-4 h-4"></i> Relatórios
+        </button>
+        <button onclick="openAdminModal()" id="tab-admin" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-amber-400 hover:text-amber-300">
+          <i data-lucide="lock" class="w-4 h-4"></i> Admin
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- ABA 1: FORMULÁRIO -->
+    <section id="view-form" class="space-y-6">
+      
+      <form id="evaluation-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+
+        <!-- Identificação -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+          <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <i data-lucide="user-check" class="text-blue-400"></i> Identificação do Avaliador
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Nome do Avaliador / Estudante *</label>
+              <input type="text" id="eval-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Digite seu nome completo" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-1">Grupo de TI Avaliado *</label>
+              <select id="eval-group" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <option value="">Selecione um grupo (1 a 12)</option>
+                <script>
+                  for(let i=1; i<=12; i++) {
+                    document.write(`<option value="Grupo ${i}">Grupo ${i} - Projeto Agendamento</option>`);
+                  }
+                </script>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bloco 1 -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h3 class="text-md font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>1.</span> Perfil e Fit Cultural da Equipe
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Clareza, transparência e dinamismo na apresentação da proposta:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b1_q1_${i}" name="b1_q1" value="${i}" required>
+                      <label for="b1_q1_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Postura profissional e alinhamento com ética e responsabilidade:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b1_q2_${i}" name="b1_q2" value="${i}" required>
+                      <label for="b1_q2_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 2 -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h3 class="text-md font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>2.</span> Competências Comportamentais (Soft Skills)
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Articulação, coesão do grupo e divisão clara de papéis:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b2_q1_${i}" name="b2_q1" value="${i}" required>
+                      <label for="b2_q1_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Flexibilidade e inteligência emocional ao responder dúvidas:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b2_q2_${i}" name="b2_q2" value="${i}" required>
+                      <label for="b2_q2_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 3 -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h3 class="text-md font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>3.</span> Solução Técnica e Inovação (Hard Skills)
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Eficiência e simplicidade no aplicativo para o agendamento da coordenação:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b3_q1_${i}" name="b3_q1" value="${i}" required>
+                      <label for="b3_q1_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Domínio técnico e clareza na explicação da solução:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b3_q2_${i}" name="b3_q2" value="${i}" required>
+                      <label for="b3_q2_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 4 -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h3 class="text-md font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>4.</span> Organização e Visão de Negócio
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Planejamento, organização e gestão do tempo:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b4_q1_${i}" name="b4_q1" value="${i}" required>
+                      <label for="b4_q1_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-slate-200 mb-2">Viabilidade técnica e potencial de uso do produto no mundo real:</p>
+              <div class="star-rating flex gap-2">
+                <script>
+                  for(let i=1; i<=5; i++) {
+                    document.write(`
+                      <input type="radio" id="b4_q2_${i}" name="b4_q2" value="${i}" required>
+                      <label for="b4_q2_${i}" class="w-10 h-10 border border-slate-600 rounded-lg flex items-center justify-center font-bold text-slate-300 hover:border-blue-500">${i}</label>
+                    `);
+                  }
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco 5 -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+          <h3 class="text-md font-bold text-blue-400 mb-4 flex items-center gap-2">
+            <span>5.</span> Decisão de Contratação e Parecer Final
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Decisão sobre a Contratação da Equipe *</label>
+              <select id="hire-decision" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <option value="">Selecione uma opção</option>
+                <option value="Contratação Imediata">Contratação Imediata (Projeto Completo)</option>
+                <option value="Contratação Parcial/Spot">Contratação para Demandas Pontuais</option>
+                <option value="Aguardar Próxima Rodada">Aguardar Próxima Avaliação / Ajustes</option>
+                <option value="Não Contrataria">Não Contrataria neste Momento</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Justificativa e Parecer Final *</label>
+              <textarea id="eval-comments" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Apresente a justificativa técnica/comportamental para a decisão tomada..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-lg">
+          <i data-lucide="send"></i> Enviar Avaliação
+        </button>
+      </form>
+    </section>
+
+    <!-- ABA 2: DASHBOARD -->
+    <section id="view-dashboard" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+          <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="text-blue-400"></i> Pontuação Média por Grupo</h3>
+          <canvas id="chart-scores" class="w-full max-h-80"></canvas>
+        </div>
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+          <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="pie-chart" class="text-emerald-400"></i> Decisões de Contratação</h3>
+          <canvas id="chart-hiring" class="w-full max-h-80"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: RELATÓRIOS -->
+    <section id="view-reports" class="hidden space-y-6">
+      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="file-text" class="text-blue-400"></i> Resumo Consolidado por Grupo</h2>
+        <div id="reports-container" class="space-y-4">
+          <!-- Gerado dinamicamente via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 4: ADMIN / EXPORTAR -->
+    <section id="view-admin" class="hidden space-y-6">
+      <div class="bg-slate-800 p-6 rounded-2xl border border-amber-500/30 shadow-xl space-y-6">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+              <i data-lucide="shield-check"></i> Painel do Professor / Administrador
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Acesso restrito para extração de relatórios e gestão de dados.</p>
+          </div>
+          <button onclick="logoutAdmin()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs rounded-lg text-slate-300 transition">
+            Sair do Admin
+          </button>
+        </div>
+
+        <!-- Ações do Admin -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-slate-900 p-5 rounded-xl border border-slate-700 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-white mb-1 flex items-center gap-2"><i data-lucide="file-spreadsheet" class="text-emerald-400"></i> Exportar Dados para Excel (CSV)</h3>
+              <p class="text-xs text-slate-400 mb-4">Baixe todas as respostas registradas com notas detalhadas e pareceres finais para planilha.</p>
+            </div>
+            <button onclick="exportToExcel()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="download"></i> Baixar Relatório em Excel
+            </button>
+          </div>
+
+          <div class="bg-slate-900 p-5 rounded-xl border border-slate-700 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-white mb-1 flex items-center gap-2"><i data-lucide="trash-2" class="text-rose-400"></i> Limpar Banco de Dados</h3>
+              <p class="text-xs text-slate-400 mb-4">Apaga permanentemente todas as avaliações registradas (para iniciar novo evento).</p>
+            </div>
+            <button onclick="clearAllData()" class="w-full py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/50 font-bold rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="alert-triangle"></i> Zerar Todas as Avaliações
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal de Login do Admin -->
+  <div id="admin-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Acesso do Professor</h3>
+          <p class="text-xs text-slate-400">Digite a senha administrativa</p>
+        </div>
+      </div>
+      <div>
+        <input type="password" id="admin-password" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-amber-500 outline-none" placeholder="Senha do Admin">
+        <p id="admin-error" class="text-xs text-rose-400 mt-1 hidden">Senha incorreta. Tente novamente.</p>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button onclick="closeAdminModal()" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg text-sm hover:bg-slate-600 transition">Cancelar</button>
+        <button onclick="verifyAdminPassword()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-sm transition">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const ADMIN_PASSWORD = "admin123"; // SENHA DO ADMINISTRADOR
+    let isAdminAuthenticated = false;
+    let storageData = JSON.parse(localStorage.getItem('evals_data')) || [];
+
+    function switchTab(tab) {
+      document.getElementById('view-form').classList.add('hidden');
+      document.getElementById('view-dashboard').classList.add('hidden');
+      document.getElementById('view-reports').classList.add('hidden');
+      document.getElementById('view-admin').classList.add('hidden');
+
+      document.getElementById('tab-form').className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-slate-400 hover:text-white";
+      document.getElementById('tab-dashboard').className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-slate-400 hover:text-white";
+      document.getElementById('tab-reports').className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-slate-400 hover:text-white";
+      document.getElementById('tab-admin').className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 text-amber-400 hover:text-amber-300";
+
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      if(tab !== 'admin') {
+        document.getElementById(`tab-${tab}`).className = "px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-blue-600 text-white";
+      }
+
+      if(tab === 'dashboard') renderCharts();
+      if(tab === 'reports') renderReports();
+    }
+
+    function openAdminModal() {
+      if(isAdminAuthenticated) {
+        switchTab('admin');
+      } else {
+        document.getElementById('admin-password').value = '';
+        document.getElementById('admin-error').classList.add('hidden');
+        document.getElementById('admin-modal').classList.remove('hidden');
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const pass = document.getElementById('admin-password').value;
+      if(pass === ADMIN_PASSWORD) {
+        isAdminAuthenticated = true;
+        closeAdminModal();
+        switchTab('admin');
+      } else {
+        document.getElementById('admin-error').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminAuthenticated = false;
+      switchTab('form');
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const evalName = document.getElementById('eval-name').value;
+      const group = document.getElementById('eval-group').value;
+
+      if(!evalName || !group) {
+        alert('Por favor, preencha seu nome e escolha o grupo!');
+        return;
+      }
+
+      const getRadioVal = (name) => parseInt(document.querySelector(`input[name="${name}"]:checked`)?.value || 0);
+
+      const entry = {
+        evalName,
+        group,
+        scores: [
+          getRadioVal('b1_q1'), getRadioVal('b1_q2'),
+          getRadioVal('b2_q1'), getRadioVal('b2_q2'),
+          getRadioVal('b3_q1'), getRadioVal('b3_q2'),
+          getRadioVal('b4_q1'), getRadioVal('b4_q2')
+        ],
+        hireDecision: document.getElementById('hire-decision').value,
+        comments: document.getElementById('eval-comments').value,
+        timestamp: new Date().toLocaleString('pt-BR')
+      };
+
+      storageData.push(entry);
+      localStorage.setItem('evals_data', JSON.stringify(storageData));
+
+      alert('Avaliação enviada com sucesso!');
+      document.getElementById('evaluation-form').reset();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    let chartScoresInst, chartHiringInst;
+
+    function renderCharts() {
+      const groups = Array.from({length: 12}, (_, i) => `Grupo ${i+1}`);
+      const averages = groups.map(g => {
+        const items = storageData.filter(d => d.group === g);
+        if(!items.length) return 0;
+        const sum = items.reduce((acc, curr) => acc + curr.scores.reduce((a,b)=>a+b,0)/curr.scores.length, 0);
+        return (sum / items.length).toFixed(1);
+      });
+
+      if(chartScoresInst) chartScoresInst.destroy();
+      const ctx1 = document.getElementById('chart-scores').getContext('2d');
+      chartScoresInst = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: groups,
+          datasets: [{
+            label: 'Média Geral (1 a 5)',
+            data: averages,
+            backgroundColor: '#3b82f6'
+          }]
+        },
+        options: {
+          scales: { y: { min: 0, max: 5 } }
+        }
+      });
+
+      const decisions = {};
+      storageData.forEach(d => {
+        decisions[d.hireDecision] = (decisions[d.hireDecision] || 0) + 1;
+      });
+
+      if(chartHiringInst) chartHiringInst.destroy();
+      const ctx2 = document.getElementById('chart-hiring').getContext('2d');
+      chartHiringInst = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(decisions),
+          datasets: [{
+            data: Object.values(decisions),
+            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+          }]
+        }
+      });
+    }
+
+    function renderReports() {
+      const container = document.getElementById('reports-container');
+      if(!storageData.length) {
+        container.innerHTML = `<p class="text-slate-400">Nenhuma avaliação realizada ainda.</p>`;
+        return;
+      }
+
+      container.innerHTML = storageData.map((d) => `
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-blue-400">${d.group}</span>
+            <span class="text-xs text-slate-400">Avaliador: ${d.evalName} (${d.timestamp})</span>
+          </div>
+          <p class="text-sm text-slate-300"><strong>Decisão:</strong> ${d.hireDecision}</p>
+          <p class="text-sm text-slate-400"><strong>Parecer:</strong> ${d.comments}</p>
+        </div>
+      `).join('');
+    }
+
+    // EXPORTAR PARA EXCEL (CSV)
+    function exportToExcel() {
+      if(!storageData.length) {
+        alert("Nenhum dado registrado para exportar.");
+        return;
+      }
+
+      let csvContent = "\uFEFF"; // BOM para acentuação no Excel em Português
+      csvContent += "Data/Hora;Avaliador;Grupo Avaliado;Fit Cultural Q1;Fit Cultural Q2;Soft Skills Q1;Soft Skills Q2;Hard Skills Q1;Hard Skills Q2;Negocios Q1;Negocios Q2;Media Avaliador;Decisao Contratacao;Parecer Final\n";
+
+      storageData.forEach(item => {
+        const avg = (item.scores.reduce((a,b)=>a+b,0)/item.scores.length).toFixed(2).replace('.', ',');
+        const row = [
+          `"${item.timestamp}"`,
+          `"${item.evalName}"`,
+          `"${item.group}"`,
+          item.scores[0], item.scores[1],
+          item.scores[2], item.scores[3],
+          item.scores[4], item.scores[5],
+          item.scores[6], item.scores[7],
+          `"${avg}"`,
+          `"${item.hireDecision}"`,
+          `"${item.comments.replace(/"/g, '""')}"`
+        ];
+        csvContent += row.join(";") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `resultados_avaliacao_ti_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearAllData() {
+      if(confirm("Tem certeza que deseja apagar TODAS as avaliações? Esta ação não pode ser desfeita.")) {
+        localStorage.removeItem('evals_data');
+        storageData = [];
+        alert("Banco de dados zerado com sucesso!");
+        switchTab('admin');
+      }
+    }
+  </script>
+</body>
+</html>

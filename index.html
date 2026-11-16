@@ -73,12 +73,15 @@
             <div>
               <label class="block text-sm font-medium text-slate-300 mb-1">Grupo de TI Avaliado *</label>
               <select id="eval-group" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 outline-none" required>
-                <option value="">Selecione um grupo (1 a 12)</option>
-                <script>
-                  for(let i=1; i<=12; i++) {
-                    document.write(`<option value="Grupo ${i}">Grupo ${i} - Projeto Agendamento</option>`);
-                  }
-                </script>
+                <option value="">Selecione a equipe avaliada</option>
+                <option value="1 - Code Pather">1 - Code Pather</option>
+                <option value="2 - Phoenix Dev">2 - Phoenix Dev</option>
+                <option value="3 - AI Innovators">3 - AI Innovators</option>
+                <option value="4 - Code Spartans">4 - Code Spartans</option>
+                <option value="5 - DEV Masters">5 - DEV Masters</option>
+                <option value="6 - Tech TItans">6 - Tech TItans</option>
+                <option value="7 - Dragon Code">7 - Dragon Code</option>
+                <option value="8 - Dev Squad">8 - Dev Squad</option>
               </select>
             </div>
           </div>
@@ -345,7 +348,18 @@
   <script>
     lucide.createIcons();
 
-    const ADMIN_PASSWORD = "admin123"; // SENHA DO ADMINISTRADOR
+    const ADMIN_PASSWORD = "admin123";
+    const GROUPS_LIST = [
+      "1 - Code Pather",
+      "2 - Phoenix Dev",
+      "3 - AI Innovators",
+      "4 - Code Spartans",
+      "5 - DEV Masters",
+      "6 - Tech TItans",
+      "7 - Dragon Code",
+      "8 - Dev Squad"
+    ];
+
     let isAdminAuthenticated = false;
     let storageData = JSON.parse(localStorage.getItem('evals_data')) || [];
 
@@ -428,7 +442,7 @@
       storageData.push(entry);
       localStorage.setItem('evals_data', JSON.stringify(storageData));
 
-      alert('Avaliação enviada com sucesso!');
+      alert('Avaliação enviada com sucesso! O formulário foi limpo para o próximo avaliador.');
       document.getElementById('evaluation-form').reset();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -436,8 +450,7 @@
     let chartScoresInst, chartHiringInst;
 
     function renderCharts() {
-      const groups = Array.from({length: 12}, (_, i) => `Grupo ${i+1}`);
-      const averages = groups.map(g => {
+      const averages = GROUPS_LIST.map(g => {
         const items = storageData.filter(d => d.group === g);
         if(!items.length) return 0;
         const sum = items.reduce((acc, curr) => acc + curr.scores.reduce((a,b)=>a+b,0)/curr.scores.length, 0);
@@ -449,7 +462,7 @@
       chartScoresInst = new Chart(ctx1, {
         type: 'bar',
         data: {
-          labels: groups,
+          labels: GROUPS_LIST,
           datasets: [{
             label: 'Média Geral (1 a 5)',
             data: averages,
@@ -499,14 +512,13 @@
       `).join('');
     }
 
-    // EXPORTAR PARA EXCEL (CSV)
     function exportToExcel() {
       if(!storageData.length) {
         alert("Nenhum dado registrado para exportar.");
         return;
       }
 
-      let csvContent = "\uFEFF"; // BOM para acentuação no Excel em Português
+      let csvContent = "\uFEFF";
       csvContent += "Data/Hora;Avaliador;Grupo Avaliado;Fit Cultural Q1;Fit Cultural Q2;Soft Skills Q1;Soft Skills Q2;Hard Skills Q1;Hard Skills Q2;Negocios Q1;Negocios Q2;Media Avaliador;Decisao Contratacao;Parecer Final\n";
 
       storageData.forEach(item => {
